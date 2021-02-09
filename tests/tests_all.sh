@@ -1,6 +1,6 @@
 #!/bin/bash -e
 
-dialects=("sqlite" "mysql")
+dialects=("mysql")
 
 if [[ $(pwd) == *"gorm/tests"* ]]; then
   cd ..
@@ -21,19 +21,10 @@ for dialect in "${dialects[@]}" ; do
 
     if [ "$GORM_VERBOSE" = "" ]
     then
-      GORM_DIALECT=${dialect} go test -race -count=1 ./...
       if [ -d tests ]
       then
         cd tests
         GORM_DIALECT=${dialect} go test -race -count=1 ./...
-        cd ..
-      fi
-    else
-      GORM_DIALECT=${dialect} go test -race -count=1 -v ./...
-      if [ -d tests ]
-      then
-        cd tests
-        GORM_DIALECT=${dialect} go test -race -count=1 -v ./...
         cd ..
       fi
     fi
