@@ -22,7 +22,6 @@ var (
 	_errorLogKey        = keyWithPrefix("error")
 	_resultLogKey       = keyWithPrefix("result")
 	_sqlLogKey          = keyWithPrefix("sql")
-	_varsLogKey         = keyWithPrefix("vars")
 	_rowsAffectedLogKey = keyWithPrefix("rowsAffected")
 )
 
@@ -89,17 +88,10 @@ func tag(sp opentracing.Span, db *gorm.DB) {
 
 // log called after operation
 func log(sp opentracing.Span, db *gorm.DB, verbose bool) {
-	fields := make([]opentracinglog.Field, 0, 5)
-	fields = append(fields, opentracinglog.String(_sqlLogKey, db.Statement.SQL.String()))
+	fields := make([]opentracinglog.Field, 0, 4)
+	fields = append(fields, opentracinglog.String(_sqlLogKey,
+		db.Dialector.Explain(db.Statement.SQL.String(), db.Statement.Vars...)))
 	fields = append(fields, opentracinglog.Object(_rowsAffectedLogKey, db.Statement.RowsAffected))
-	if db.Statement.Vars != nil {
-		v, err := json.Marshal(db.Statement.Vars)
-		if err == nil {
-			fields = append(fields, opentracinglog.String(_varsLogKey, *(*string)(unsafe.Pointer(&v))))
-		} else {
-			db.Logger.Error(context.Background(), "could not marshal db.Statement.Dest: %v", err)
-		}
-	}
 
 	if err := db.Error; err != nil {
 		fields = append(fields, opentracinglog.String(_errorLogKey, err.Error()))
