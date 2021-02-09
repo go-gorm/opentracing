@@ -32,3 +32,9 @@ func main() {
 // WithLogResult log result into span log, default: disabled.
 func WithLogResult(logResult bool)
 ```
+
+### Snapshots
+
+<img src="./assets/shot1.png" width="100%"/>
+
+<img src="./assets/shot2.png" width="100%"/>

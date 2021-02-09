@@ -8,7 +8,6 @@ import (
 	"time"
 
 	"github.com/opentracing/opentracing-go"
-
 	"github.com/uber/jaeger-client-go"
 	"github.com/uber/jaeger-client-go/config"
 	jaegerlog "github.com/uber/jaeger-client-go/log"
