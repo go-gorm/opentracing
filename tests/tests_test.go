@@ -7,6 +7,8 @@ import (
 	"os"
 	"time"
 
+	gormopentracing "github.com/yeqown/gorm-opentracing"
+
 	"gorm.io/driver/mysql"
 	"gorm.io/gorm"
 	"gorm.io/gorm/logger"
@@ -33,6 +35,11 @@ func init() {
 	}
 
 	RunMigrations()
+
+	if err = DB.Use(gormopentracing.New(gormopentracing.WithLogResult(true))); err != nil {
+		log.Printf("failed to use gormopentracing plugin, got error %v", err)
+		os.Exit(1)
+	}
 }
 
 func OpenTestConnection() (db *gorm.DB, err error) {
