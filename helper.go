@@ -93,8 +93,9 @@ func log(sp opentracing.Span, db *gorm.DB, verbose bool) {
 		db.Dialector.Explain(db.Statement.SQL.String(), db.Statement.Vars...)))
 	fields = append(fields, opentracinglog.Object(_rowsAffectedLogKey, db.Statement.RowsAffected))
 
+	// log error
 	if err := db.Error; err != nil {
-		fields = append(fields, opentracinglog.String(_errorLogKey, err.Error()))
+		fields = append(fields, opentracinglog.Error(err))
 	}
 
 	if verbose && db.Statement.Dest != nil {
