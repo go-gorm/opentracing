@@ -4,13 +4,15 @@ opentracing support for gorm2
 
 ### Features
 
-[ ] Record `SQL` in `span` logs.
+- [x] Record `SQL` in `span` logs.
 
-[ ] Record `Table` in `span` tags.
+- [x] Record `Result` in `span` logs.
+  
+- [x] Record `Table` in `span` tags.
 
-[ ] Record `Error` in `span` tags and logs.
+- [x] Record `Error` in `span` tags and logs.
 
-[ ] Register `Create` `Query` `Delete` `Update` `Row` `Raw` tracing callbacks. 
+- [x] Register `Create` `Query` `Delete` `Update` `Row` `Raw` tracing callbacks. 
 
 ### Get Started
 

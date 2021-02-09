@@ -2,20 +2,30 @@ package gormopentracing
 
 import "gorm.io/gorm"
 
-type operationName string
-
-func (op operationName) String() string {
-	return string(op)
-}
-
-const (
-	_createOp operationName = "create"
-)
-
 func (p opentracingPlugin) beforeCreate(db *gorm.DB) {
 	injectBefore(db, _createOp)
 }
 
-func (p opentracingPlugin) afterCreate(db *gorm.DB) {
-	extractAfter(db)
+func (p opentracingPlugin) after(db *gorm.DB) {
+	extractAfter(db, p.logResult)
+}
+
+func (p opentracingPlugin) beforeUpdate(db *gorm.DB) {
+	injectBefore(db, _updateOp)
+}
+
+func (p opentracingPlugin) beforeQuery(db *gorm.DB) {
+	injectBefore(db, _queryOp)
+}
+
+func (p opentracingPlugin) beforeDelete(db *gorm.DB) {
+	injectBefore(db, _deleteOp)
+}
+
+func (p opentracingPlugin) beforeRow(db *gorm.DB) {
+	injectBefore(db, _rowOp)
+}
+
+func (p opentracingPlugin) beforeRaw(db *gorm.DB) {
+	injectBefore(db, _rawOp)
 }
