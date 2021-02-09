@@ -14,8 +14,9 @@ const (
 )
 
 var (
+	// span.Tag keys
 	_tableTagKey = keyWithPrefix("table")
-
+	// span.Log keys
 	_errorLogKey  = keyWithPrefix("error")
 	_resultLogKey = keyWithPrefix("result")
 	_sqlLogKey    = keyWithPrefix("sql")
