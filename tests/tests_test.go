@@ -7,6 +7,11 @@ import (
 	"os"
 	"time"
 
+	"github.com/opentracing/opentracing-go"
+
+	"github.com/uber/jaeger-client-go"
+	"github.com/uber/jaeger-client-go/config"
+	jaegerlog "github.com/uber/jaeger-client-go/log"
 	gormopentracing "github.com/yeqown/gorm-opentracing"
 
 	"gorm.io/driver/mysql"
@@ -19,7 +24,7 @@ var DB *gorm.DB
 
 func init() {
 	var err error
-	if DB, err = OpenTestConnection(); err != nil {
+	if DB, err = openTestConnection(); err != nil {
 		log.Printf("failed to connect database, got error %v", err)
 		os.Exit(1)
 	}
@@ -29,22 +34,60 @@ func init() {
 	if err == nil {
 		err = sqlDB.Ping()
 	}
-
 	if err != nil {
 		log.Printf("failed to connect database, got error %v", err)
+		os.Exit(1)
 	}
 
-	RunMigrations()
+	runMigrations()
+	bootTestTracer()
+	usePlugin()
+}
 
-	if err = DB.Use(gormopentracing.New(gormopentracing.WithLogResult(true))); err != nil {
+func bootTestTracer() {
+	// DONE(@yeqown) use jaeger tracer
+	cfg := &config.Configuration{
+		Sampler: &config.SamplerConfig{
+			Type:  jaeger.SamplerTypeConst,
+			Param: 1,
+		},
+		ServiceName: "gormopentracing",
+		Reporter: &config.ReporterConfig{
+			LogSpans: true,
+			//LocalAgentHostPort:  "127.0.0.1:6381",
+			BufferFlushInterval: 100 * time.Millisecond,
+			CollectorEndpoint:   "http://127.0.0.1:14268/api/traces",
+		},
+	}
+
+	tracer, _, err := cfg.NewTracer(
+		config.Logger(jaegerlog.StdLogger),
+		config.ZipkinSharedRPCSpan(true),
+	)
+	if err != nil {
+		log.Printf("failed to use jaeger tracer plugin, got error %v", err)
+		os.Exit(1)
+	}
+
+	opentracing.SetGlobalTracer(tracer)
+}
+
+func usePlugin() {
+	if err := DB.Use(gormopentracing.New(
+		gormopentracing.WithLogResult(true),
+	)); err != nil {
 		log.Printf("failed to use gormopentracing plugin, got error %v", err)
 		os.Exit(1)
 	}
 }
 
-func OpenTestConnection() (db *gorm.DB, err error) {
+func openTestConnection() (db *gorm.DB, err error) {
 	dbDSN := os.Getenv("GORM_DSN")
-	switch os.Getenv("GORM_DIALECT") {
+	dialect := os.Getenv("GORM_DIALECT")
+	if dialect == "" {
+		dialect = "mysql"
+	}
+	switch dialect {
 	case "mysql":
 		log.Println("testing mysql...")
 		if dbDSN == "" {
@@ -64,7 +107,7 @@ func OpenTestConnection() (db *gorm.DB, err error) {
 	return
 }
 
-func RunMigrations() {
+func runMigrations() {
 	var err error
 	allModels := []interface{}{&User{}, &Account{}, &Pet{}, &Company{}, &Toy{}, &Language{}}
 	rand.Seed(time.Now().UnixNano())
