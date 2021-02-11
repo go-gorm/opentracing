@@ -11,7 +11,7 @@ import (
 	"github.com/uber/jaeger-client-go"
 	"github.com/uber/jaeger-client-go/config"
 	jaegerlog "github.com/uber/jaeger-client-go/log"
-	gormopentracing "github.com/yeqown/gorm-opentracing"
+	gormopentracing "gorm.io/plugin/opentracing"
 
 	"gorm.io/driver/mysql"
 	"gorm.io/gorm"

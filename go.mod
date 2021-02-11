@@ -1,4 +1,4 @@
-module github.com/yeqown/gorm-opentracing
+module gorm.io/plugin/opentracing
 
 go 1.15
 

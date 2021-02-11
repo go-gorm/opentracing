@@ -1,6 +1,6 @@
 # gorm-opentracing
 
-[![Go Report Card](https://goreportcard.com/badge/github.com/yeqown/gorm-opentracing)](https://goreportcard.com/report/github.com/yeqown/gorm-opentracing) [![go.dev reference](https://img.shields.io/badge/go.dev-reference-007d9c?logo=go&logoColor=white&style=flat-square)](https://pkg.go.dev/github.com/yeqown/gorm-opentracing)
+[![Go Report Card](https://goreportcard.com/badge/gorm.io/plugin/opentracing)](https://goreportcard.com/report/gorm.io/plugin/opentracing) [![go.dev reference](https://img.shields.io/badge/go.dev-reference-007d9c?logo=go&logoColor=white&style=flat-square)](https://pkg.go.dev/gorm.io/plugin/opentracing)
 
 opentracing support for gorm2.
 
