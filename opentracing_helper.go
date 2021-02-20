@@ -19,7 +19,7 @@ var (
 	// span.Tag keys
 	_tableTagKey = keyWithPrefix("table")
 	// span.Log keys
-	_errorLogKey        = keyWithPrefix("error")
+	//_errorLogKey        = keyWithPrefix("error")
 	_resultLogKey       = keyWithPrefix("result")
 	_sqlLogKey          = keyWithPrefix("sql")
 	_rowsAffectedLogKey = keyWithPrefix("rowsAffected")
@@ -34,7 +34,7 @@ var (
 	json               = jsoniter.ConfigCompatibleWithStandardLibrary
 )
 
-func injectBefore(db *gorm.DB, op operationName) {
+func (p opentracingPlugin) injectBefore(db *gorm.DB, op operationName) {
 	// make sure context could be used
 	if db == nil {
 		return
@@ -45,11 +45,11 @@ func injectBefore(db *gorm.DB, op operationName) {
 		return
 	}
 
-	sp, _ := opentracing.StartSpanFromContext(db.Statement.Context, op.String())
+	sp, _ := opentracing.StartSpanFromContextWithTracer(db.Statement.Context, p.opt.tracer, op.String())
 	db.InstanceSet(opentracingSpanKey, sp)
 }
 
-func extractAfter(db *gorm.DB, verbose bool) {
+func (p opentracingPlugin) extractAfter(db *gorm.DB, verbose bool) {
 	// make sure context could be used
 	if db == nil {
 		return
