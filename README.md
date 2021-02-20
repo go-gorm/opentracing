@@ -21,6 +21,9 @@ func main() {
 	var db *gorm.DB
 	
 	db.Use(gormopentracing.New())
+	
+	// if you want to use customized tracer instead of opentracing.GlobalTracer() which is default,
+	// you can use the option WithTracer(yourTracer)
 }
 ```
 
@@ -61,7 +64,7 @@ func bootTracerBasedJaeger() {
 		os.Exit(1)
 	}
 	
-	// set into opentracing
+	// set into opentracing's global tracer, so the plugin would take it as default tracer.
 	opentracing.SetGlobalTracer(tracer)
 }
 ```
@@ -71,6 +74,9 @@ func bootTracerBasedJaeger() {
 ```go
 // WithLogResult log result into span log, default: disabled.
 func WithLogResult(logResult bool)
+
+// WithTracer allows to use customized tracer rather than the global one only.
+func WithTracer(tracer opentracing.Tracer)
 ```
 
 ### Snapshots
