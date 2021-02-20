@@ -69,12 +69,50 @@ func bootTestTracer() {
 	}
 
 	opentracing.SetGlobalTracer(tracer)
+
+	cfg2 := &config.Configuration{
+		Sampler: &config.SamplerConfig{
+			Type:  jaeger.SamplerTypeConst,
+			Param: 1,
+		},
+		ServiceName: "mysql",
+		Reporter: &config.ReporterConfig{
+			LogSpans: true,
+			//LocalAgentHostPort:  "127.0.0.1:6381",
+			BufferFlushInterval: 100 * time.Millisecond,
+			CollectorEndpoint:   "http://127.0.0.1:14268/api/traces",
+		},
+	}
+	tracer2, _, err = cfg2.NewTracer(
+		config.Logger(jaegerlog.StdLogger),
+		config.ZipkinSharedRPCSpan(true),
+	)
+	if err != nil {
+		log.Printf("failed to use jaeger tracer plugin, got error %v", err)
+		os.Exit(1)
+	}
 }
 
+var (
+	tracer2 opentracing.Tracer
+)
+
 func usePlugin() {
-	if err := DB.Use(gormopentracing.New(
-		gormopentracing.WithLogResult(true),
-	)); err != nil {
+	var p gorm.Plugin
+
+	withTracer := os.Getenv("WITH_TRACER2")
+	if withTracer == "" {
+		p = gormopentracing.New(
+			gormopentracing.WithLogResult(true),
+		)
+	} else {
+		p = gormopentracing.New(
+			gormopentracing.WithLogResult(true),
+			gormopentracing.WithTracer(tracer2),
+		)
+	}
+
+	if err := DB.Use(p); err != nil {
 		log.Printf("failed to use gormopentracing plugin, got error %v", err)
 		os.Exit(1)
 	}

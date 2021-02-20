@@ -24,6 +24,9 @@ for dialect in "${dialects[@]}" ; do
       if [ -d tests ]
       then
         cd tests
+        # with customized tracer
+        WITH_TRACER2=true GORM_DIALECT=${dialect} go test -count=1 ./...
+        # with global tracer
         GORM_DIALECT=${dialect} go test -race -count=1 ./...
         cd ..
       fi

@@ -7,21 +7,21 @@ import (
 )
 
 type opentracingPlugin struct {
-	// logResult means log SQL operation result into span log which causes span size grows up.
-	// This is advised to only open in developing environment.
-	logResult bool
+	// opt includes options those opentracingPlugin support.
+	opt *options
 }
 
 // New constructs a new plugin based opentracing. It supports to trace all operations in gorm,
 // so if you have already traced your servers, now this plugin will perfect your tracing job.
 func New(opts ...applyOption) gorm.Plugin {
-	dst := new(options)
+	dst := defaultOption()
 	for _, apply := range opts {
 		apply(dst)
 	}
 
 	return opentracingPlugin{
-		logResult: dst.logResult,
+		//logResult: dst.logResult,
+		opt: dst,
 	}
 }
 
