@@ -7,7 +7,7 @@ func (p opentracingPlugin) beforeCreate(db *gorm.DB) {
 }
 
 func (p opentracingPlugin) after(db *gorm.DB) {
-	p.extractAfter(db, p.opt.logResult)
+	p.extractAfter(db)
 }
 
 func (p opentracingPlugin) beforeUpdate(db *gorm.DB) {
