@@ -49,7 +49,7 @@ func (p opentracingPlugin) injectBefore(db *gorm.DB, op operationName) {
 	db.InstanceSet(opentracingSpanKey, sp)
 }
 
-func (p opentracingPlugin) extractAfter(db *gorm.DB, verbose bool) {
+func (p opentracingPlugin) extractAfter(db *gorm.DB) {
 	// make sure context could be used
 	if db == nil {
 		return
@@ -74,7 +74,7 @@ func (p opentracingPlugin) extractAfter(db *gorm.DB, verbose bool) {
 
 	// tag and log fields we want.
 	tag(sp, db)
-	log(sp, db, verbose)
+	log(sp, db, p.opt.logResult, p.opt.logSqlParameters)
 }
 
 // tag called after operation
@@ -87,10 +87,9 @@ func tag(sp opentracing.Span, db *gorm.DB) {
 }
 
 // log called after operation
-func log(sp opentracing.Span, db *gorm.DB, verbose bool) {
+func log(sp opentracing.Span, db *gorm.DB, verbose bool, logSqlVariables bool) {
 	fields := make([]opentracinglog.Field, 0, 4)
-	fields = append(fields, opentracinglog.String(_sqlLogKey,
-		db.Dialector.Explain(db.Statement.SQL.String(), db.Statement.Vars...)))
+	fields = appendSql(fields, db, logSqlVariables)
 	fields = append(fields, opentracinglog.Object(_rowsAffectedLogKey, db.Statement.RowsAffected))
 
 	// log error
@@ -110,4 +109,14 @@ func log(sp opentracing.Span, db *gorm.DB, verbose bool) {
 	}
 
 	sp.LogFields(fields...)
+}
+
+func appendSql(fields []opentracinglog.Field, db *gorm.DB, logSqlVariables bool) []opentracinglog.Field {
+	if logSqlVariables {
+		fields = append(fields, opentracinglog.String(_sqlLogKey,
+			db.Dialector.Explain(db.Statement.SQL.String(), db.Statement.Vars...)))
+	} else {
+		fields = append(fields, opentracinglog.String(_sqlLogKey, db.Statement.SQL.String()))
+	}
+	return fields
 }

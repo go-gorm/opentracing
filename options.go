@@ -9,12 +9,16 @@ type options struct {
 
 	// tracer allows users to use customized and different tracer to makes tracing clearly.
 	tracer opentracing.Tracer
+
+	// Whether to log statement parameters or leave placeholders in the queries.
+	logSqlParameters bool
 }
 
 func defaultOption() *options {
 	return &options{
-		logResult: false,
-		tracer:    opentracing.GlobalTracer(),
+		logResult:        false,
+		tracer:           opentracing.GlobalTracer(),
+		logSqlParameters: true,
 	}
 }
 
@@ -35,5 +39,11 @@ func WithTracer(tracer opentracing.Tracer) applyOption {
 		}
 
 		o.tracer = tracer
+	}
+}
+
+func WithSqlParameters(logSqlParameters bool) applyOption {
+	return func(o *options) {
+		o.logSqlParameters = logSqlParameters
 	}
 }
