@@ -19,7 +19,7 @@ var (
 	// span.Tag keys
 	_tableTagKey = keyWithPrefix("table")
 	// span.Log keys
-	//_errorLogKey        = keyWithPrefix("error")
+	// _errorLogKey        = keyWithPrefix("error")
 	_resultLogKey       = keyWithPrefix("result")
 	_sqlLogKey          = keyWithPrefix("sql")
 	_rowsAffectedLogKey = keyWithPrefix("rowsAffected")
@@ -27,6 +27,20 @@ var (
 
 func keyWithPrefix(key string) string {
 	return _prefix + "." + key
+}
+func getSpanCtx(c context.Context, spanCtxKey string) (opentracing.SpanContext, bool) {
+	var spanCtx opentracing.SpanContext
+	spanCtxData := c.Value(spanCtxKey)
+	spanCtx, ok := spanCtxData.(opentracing.SpanContext)
+	return spanCtx, ok
+}
+func getOpNameCtx(c context.Context, opNameKey string) string {
+	opNameData := c.Value(opNameKey)
+	opName, ok := opNameData.(string)
+	if ok {
+		return opName
+	}
+	return ""
 }
 
 var (
@@ -44,8 +58,16 @@ func (p opentracingPlugin) injectBefore(db *gorm.DB, op operationName) {
 		db.Logger.Error(context.TODO(), "could not inject sp from nil Statement.Context or nil Statement")
 		return
 	}
-
-	sp, _ := opentracing.StartSpanFromContextWithTracer(db.Statement.Context, p.opt.tracer, op.String())
+	ctx := db.Statement.Context
+	spanCtx, ok := getSpanCtx(ctx, p.opt.spanCtxKey)
+	if !ok {
+		return
+	}
+	opName := getOpNameCtx(ctx, p.opt.opNameKey)
+	if opName == "" {
+		opName = op.String()
+	}
+	sp := p.opt.tracer.StartSpan(opName, opentracing.ChildOf(spanCtx))
 	db.InstanceSet(opentracingSpanKey, sp)
 }
 
@@ -60,7 +82,7 @@ func (p opentracingPlugin) extractAfter(db *gorm.DB) {
 	}
 
 	// extract sp from db context
-	//sp := opentracing.SpanFromContext(db.Statement.Context)
+	// sp := opentracing.SpanFromContext(db.Statement.Context)
 	v, ok := db.InstanceGet(opentracingSpanKey)
 	if !ok || v == nil {
 		return

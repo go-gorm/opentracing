@@ -2,6 +2,11 @@ package gormopentracing
 
 import "github.com/opentracing/opentracing-go"
 
+const (
+	defaultSpanCtxKey = "gormTraceSpanCtx"
+	defaultOpNameKey  = "gormTraceOpName"
+)
+
 type options struct {
 	// logResult means log SQL operation result into span log which causes span size grows up.
 	// This is advised to only open in developing environment.
@@ -12,6 +17,8 @@ type options struct {
 
 	// Whether to log statement parameters or leave placeholders in the queries.
 	logSqlParameters bool
+	spanCtxKey       string
+	opNameKey        string
 }
 
 func defaultOption() *options {
@@ -19,6 +26,8 @@ func defaultOption() *options {
 		logResult:        false,
 		tracer:           opentracing.GlobalTracer(),
 		logSqlParameters: true,
+		spanCtxKey:       defaultSpanCtxKey,
+		opNameKey:        defaultOpNameKey,
 	}
 }
 
@@ -41,9 +50,18 @@ func WithTracer(tracer opentracing.Tracer) applyOption {
 		o.tracer = tracer
 	}
 }
-
 func WithSqlParameters(logSqlParameters bool) applyOption {
 	return func(o *options) {
 		o.logSqlParameters = logSqlParameters
+	}
+}
+func WithSpanCtxKey(spanCtxKey string) applyOption {
+	return func(o *options) {
+		o.spanCtxKey = spanCtxKey
+	}
+}
+func WithOpNameKey(opNameKey string) applyOption {
+	return func(o *options) {
+		o.opNameKey = opNameKey
 	}
 }
