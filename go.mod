@@ -1,4 +1,4 @@
-module gorm.io/plugin/opentracing
+module github.com/buffge/opentracing
 
 go 1.16
 
