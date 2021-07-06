@@ -73,14 +73,28 @@ func (p opentracingPlugin) extractAfter(db *gorm.DB) {
 	defer sp.Finish()
 
 	// tag and log fields we want.
-	tag(sp, db)
+	tag(sp, db, p.opt.errorTagHook)
 	log(sp, db, p.opt.logResult, p.opt.logSqlParameters)
 }
 
+// errorTagHook will be called while gorm.DB got an error and we need a way to mark this error
+// in current opentracing.Span. Of course, you can use sp.LogField in this hook, but it's not
+// recommended to.
+//
+// mark an error tag in sp as default:
+//
+// sp.SetTag(sp.SetTag(_errorTagKey, true))
+type errorTagHook func(sp opentracing.Span, err error)
+
+func defaultErrorTagHook(sp opentracing.Span, err error) {
+	sp.SetTag(_errorTagKey, true)
+}
+
 // tag called after operation
-func tag(sp opentracing.Span, db *gorm.DB) {
-	if err := db.Error; err != nil {
-		sp.SetTag(_errorTagKey, true)
+func tag(sp opentracing.Span, db *gorm.DB, errorTagHook errorTagHook) {
+	if err := db.Error; err != nil && nil != errorTagHook {
+		errorTagHook(sp, err)
+		// sp.SetTag(_errorTagKey, true)
 	}
 
 	sp.SetTag(_tableTagKey, db.Statement.Table)
