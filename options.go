@@ -12,6 +12,9 @@ type options struct {
 
 	// Whether to log statement parameters or leave placeholders in the queries.
 	logSqlParameters bool
+
+	// errorTagHook allows users to customized error what kind of error tag should be tagged.
+	errorTagHook errorTagHook
 }
 
 func defaultOption() *options {
@@ -19,6 +22,7 @@ func defaultOption() *options {
 		logResult:        false,
 		tracer:           opentracing.GlobalTracer(),
 		logSqlParameters: true,
+		errorTagHook:     defaultErrorTagHook,
 	}
 }
 
@@ -45,5 +49,15 @@ func WithTracer(tracer opentracing.Tracer) applyOption {
 func WithSqlParameters(logSqlParameters bool) applyOption {
 	return func(o *options) {
 		o.logSqlParameters = logSqlParameters
+	}
+}
+
+func WithErrorTagHook(errorTagHook errorTagHook) applyOption {
+	return func(o *options) {
+		if errorTagHook == nil {
+			return
+		}
+
+		o.errorTagHook = errorTagHook
 	}
 }
