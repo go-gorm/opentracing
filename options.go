@@ -26,17 +26,17 @@ func defaultOption() *options {
 	}
 }
 
-type applyOption func(o *options)
+type ApplyOption func(o *options)
 
 // WithLogResult enable opentracingPlugin to log the result of each executed sql.
-func WithLogResult(logResult bool) applyOption {
+func WithLogResult(logResult bool) ApplyOption {
 	return func(o *options) {
 		o.logResult = logResult
 	}
 }
 
 // WithTracer allows to use customized tracer rather than the global one only.
-func WithTracer(tracer opentracing.Tracer) applyOption {
+func WithTracer(tracer opentracing.Tracer) ApplyOption {
 	return func(o *options) {
 		if tracer == nil {
 			return
@@ -46,13 +46,13 @@ func WithTracer(tracer opentracing.Tracer) applyOption {
 	}
 }
 
-func WithSqlParameters(logSqlParameters bool) applyOption {
+func WithSqlParameters(logSqlParameters bool) ApplyOption {
 	return func(o *options) {
 		o.logSqlParameters = logSqlParameters
 	}
 }
 
-func WithErrorTagHook(errorTagHook errorTagHook) applyOption {
+func WithErrorTagHook(errorTagHook errorTagHook) ApplyOption {
 	return func(o *options) {
 		if errorTagHook == nil {
 			return
