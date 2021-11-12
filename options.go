@@ -15,6 +15,24 @@ type options struct {
 
 	// errorTagHook allows users to customized error what kind of error tag should be tagged.
 	errorTagHook errorTagHook
+
+	// createOpName defines operation name for "create" span
+	createOpName operationName
+
+	// updateOpName defines operation name for "update" span
+	updateOpName operationName
+
+	// queryOpName defines operation name for "query" span
+	queryOpName operationName
+
+	// deleteOpName defines operation name for "delete" span
+	deleteOpName operationName
+
+	// rowOpName defines operation name for "row" span
+	rowOpName operationName
+
+	// rawOpName defines operation name for "raw" span
+	rawOpName operationName
 }
 
 func defaultOption() *options {
@@ -23,6 +41,12 @@ func defaultOption() *options {
 		tracer:           opentracing.GlobalTracer(),
 		logSqlParameters: true,
 		errorTagHook:     defaultErrorTagHook,
+		createOpName:     _createOp,
+		updateOpName:     _updateOp,
+		queryOpName:      _queryOp,
+		deleteOpName:     _deleteOp,
+		rowOpName:        _rowOp,
+		rawOpName:        _rawOp,
 	}
 }
 
@@ -59,5 +83,65 @@ func WithErrorTagHook(errorTagHook errorTagHook) ApplyOption {
 		}
 
 		o.errorTagHook = errorTagHook
+	}
+}
+
+func WithCreateOpName(name operationName) ApplyOption {
+	return func(o *options) {
+		if name == "" {
+			return
+		}
+
+		o.createOpName = name
+	}
+}
+
+func WithUpdateOpName(name operationName) ApplyOption {
+	return func(o *options) {
+		if name == "" {
+			return
+		}
+
+		o.updateOpName = name
+	}
+}
+
+func WithQueryOpName(name operationName) ApplyOption {
+	return func(o *options) {
+		if name == "" {
+			return
+		}
+
+		o.queryOpName = name
+	}
+}
+
+func WithDeleteOpName(name operationName) ApplyOption {
+	return func(o *options) {
+		if name == "" {
+			return
+		}
+
+		o.deleteOpName = name
+	}
+}
+
+func WithRowOpName(name operationName) ApplyOption {
+	return func(o *options) {
+		if name == "" {
+			return
+		}
+
+		o.rowOpName = name
+	}
+}
+
+func WithRawOpName(name operationName) ApplyOption {
+	return func(o *options) {
+		if name == "" {
+			return
+		}
+
+		o.rawOpName = name
 	}
 }
