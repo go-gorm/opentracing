@@ -17,6 +17,10 @@ opentracing support for gorm2.
 I assume that you already have an opentracing Tracer client started in your project.
 
 ```go
+import (
+        ....
+	gormopentracing "gorm.io/plugin/opentracing"
+)
 func main() {
 	var db *gorm.DB
 	
